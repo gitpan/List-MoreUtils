@@ -20,12 +20,12 @@ sub arrayeq {
     return 1;
 }
 
+my @bigary = (1) x 500;
+sub grow_stack { func(@bigary); };
+sub func {};
+
 my $TESTS = 0;
 
-BEGIN { $TESTS += 1 }
-ok(1); 
-
-# any(2...)
 BEGIN { $TESTS += 6 }
 {
     my @list = (1 .. 10000);
@@ -37,7 +37,7 @@ BEGIN { $TESTS += 6 }
     ok(!defined(any { }));
 }
 
-# all (8...)
+
 BEGIN { $TESTS += 4 }
 {
     my @list = (1 .. 10000);
@@ -47,17 +47,17 @@ BEGIN { $TESTS += 4 }
     ok(!defined all { } );
 }
 
-# none (12...)
+
 BEGIN { $TESTS += 4 }
 {
     my @list = (1 .. 10000);
     ok(none { !defined } @list);
     ok(none { $_ > 10000 } @list);
     ok(!none { defined } @list);
-    ok(!defined none { });
+    ok(none { });
 }
 
-# notall (16...)
+
 BEGIN { $TESTS += 4 }
 {
     my @list = (1 .. 10000);
@@ -67,7 +67,7 @@ BEGIN { $TESTS += 4 }
     ok(!defined notall { });
 }
 
-# true (20...)
+
 BEGIN { $TESTS += 4 }
 {
     my @list = (1 .. 10000);
@@ -77,7 +77,7 @@ BEGIN { $TESTS += 4 }
     ok(!true { });
 }
 
-# false (24...)
+
 BEGIN { $TESTS += 4 }
 {
     my @list = (1 .. 10000);
@@ -87,7 +87,7 @@ BEGIN { $TESTS += 4 }
     ok(!false { });
 }
 
-# firstidx (28...)
+
 BEGIN { $TESTS += 4 }
 {
     my @list = (1 .. 10000);
@@ -97,7 +97,7 @@ BEGIN { $TESTS += 4 }
     ok(-1, firstidx { });
 }
 
-# lastidx (32...)
+
 BEGIN { $TESTS += 8 }
 {
     my @list = (1 .. 10000);
@@ -113,7 +113,7 @@ BEGIN { $TESTS += 8 }
     ok(-1, last_index { });
 }
 
-# insert_after (40...)
+
 BEGIN { $TESTS += 4 }
 {
     my @list = qw/This is a list/;
@@ -129,7 +129,7 @@ BEGIN { $TESTS += 4 }
     ok(join(' ', @list), "This is a longer list");
 }
 
-# insert_after_string (44...)
+
 BEGIN { $TESTS += 3 }
 {
     my @list = qw/This is a list/;
@@ -144,8 +144,8 @@ BEGIN { $TESTS += 3 }
     ok(join(' ', @list), "This\0 is\0 a\0 longer\0 list\0");
 }
 
-# apply (47...)
-BEGIN { $TESTS += 6 }
+
+BEGIN { $TESTS += 8 }
 {
     my @list  = (0 .. 9);
     my @list1 = apply { $_++ } @list;
@@ -161,12 +161,19 @@ BEGIN { $TESTS += 6 }
     ok($item, "foobar");
 
     ok(! defined apply {});
+
+    # RT 38630
+    # wrong results from apply() [XS]
+    @list = (1 .. 4);
+    @list1 = apply { grow_stack(); $_ = 5 } @list;
+    ok(arrayeq(\@list, [1 .. 4]));
+    ok(arrayeq(\@list1, [(5) x 4]));
 }
 
 # In the following, the @dummy variable is needed to circumvent
 # a parser glitch in the 5.6.x series.
 
-#after (53...)
+
 BEGIN { $TESTS += 3 }
 {
     my @x = after { $_ % 5 == 0 } 1..9;
@@ -177,7 +184,7 @@ BEGIN { $TESTS += 3 }
     ok(arrayeq(\@x, [ qw/baz foo/ ]));
 }
 
-#after_incl (56...)
+
 BEGIN { $TESTS += 3 }
 {
     my @x = after_incl {$_ % 5 == 0} 1..9;
@@ -188,7 +195,7 @@ BEGIN { $TESTS += 3 }
     ok(arrayeq(\@x, [ qw/bar baz foo/ ]));
 }
 
-#before (59...)
+
 BEGIN { $TESTS += 3 }
 {
     my @x = before {$_ % 5 == 0} 1..9;    
@@ -199,7 +206,7 @@ BEGIN { $TESTS += 3 }
     ok(arrayeq(\@x, [  qw/bar baz/ ]));
 }
 
-#before_incl (62...)
+
 BEGIN { $TESTS += 3 }
 {
     my @x = before_incl {$_ % 5 == 0} 1..9;
@@ -210,7 +217,7 @@ BEGIN { $TESTS += 3 }
     ok(arrayeq(\@x, [ qw/bar baz foo/ ]));
 }
 
-#indexes (65...)
+
 BEGIN { $TESTS += 2 }
 {
     my @x = indexes {$_ > 5}  4..9;
@@ -219,7 +226,7 @@ BEGIN { $TESTS += 2 }
     ok(!@x);
 }
 
-#lastval/last_value (67...)
+
 BEGIN { $TESTS += 4 }
 {
     my $x = last_value {$_ > 5}  4..9;  
@@ -233,7 +240,7 @@ BEGIN { $TESTS += 4 }
     ok(!defined $x);
 }
 
-#firstval/first_value (71...)
+
 BEGIN { $TESTS += 4 }
 {
     my $x = first_value {$_ > 5}  4..9; 
@@ -248,7 +255,7 @@ BEGIN { $TESTS += 4 }
     
 }
 
-#each_array (75...)
+
 BEGIN { $TESTS += 5 }
 {
     my @a = (7, 3, 'a', undef, 'r');
@@ -284,7 +291,7 @@ BEGIN { $TESTS += 5 }
 
 }
 
-#each_array (80...)
+
 BEGIN { $TESTS += 5 }
 {
     my @a = (7, 3, 'a', undef, 'r');
@@ -320,8 +327,8 @@ BEGIN { $TESTS += 5 }
 }
 
 
-#pairwise (85...)
-BEGIN { $TESTS += 9 }
+
+BEGIN { $TESTS += 10 }
 {
     my @a = (1, 2, 3, 4, 5);
     my @b = (2, 4, 6, 8, 10);
@@ -381,10 +388,16 @@ BEGIN { $TESTS += 9 }
     @b = qw/1 2 3/;
     @c = pairwise { ($a, $b) } @a, @b;
     ok(arrayeq(\@c, [qw/a 1 b 2 c 3/]));  # 88
+
+    # test that a die inside the code-reference will no longer be trapped
+    eval { pairwise { die "I died\n" } @a, @b };
+    ok($@, "I died\n");
+
+
 }
 
-#natatime (94...)
-BEGIN { $TESTS += 2 }
+
+BEGIN { $TESTS += 3 }
 {
     my @x = ('a'..'g');
     my $it = natatime 3, @x;
@@ -403,9 +416,16 @@ BEGIN { $TESTS += 2 }
 	push @r, @vals;
     }
     ok(arrayeq(\@r, \@a), 1, "natatime2");
+
+    $it = natatime 1, 1 .. 26;
+    @r = ();
+    while (my @vals = &$it) {
+	push @r, @vals;
+    }
+    ok(arrayeq(\@r, [1 .. 26]), 1, "natatime3");
 }
 
-#mesh (96...)
+
 BEGIN { $TESTS += 3 }
 {
     my @x = qw/a b c d/;
@@ -426,7 +446,7 @@ BEGIN { $TESTS += 3 }
 		     6, undef, 7, undef, 8, undef, 9, undef, 10, undef]));
 }
 
-#zip (just an alias for mesh) (99...)
+
 BEGIN { $TESTS += 3 }
 {
     my @x = qw/a b c d/;
@@ -447,18 +467,26 @@ BEGIN { $TESTS += 3 }
 		     6, undef, 7, undef, 8, undef, 9, undef, 10, undef]));
 }
 
-#uniq(102...)
-BEGIN { $TESTS += 2 }
+BEGIN { $TESTS += 4 }
 {
     my @a = map { (1 .. 10000) } 0 .. 1;
     my @u = uniq @a;
     ok(arrayeq(\@u, [1 .. 10000]));
     my $u = uniq @a;
     ok(10000, $u);
+
+    # RT #37533 
+    # bug: uniq doesn't like undef values.
+    my $warn;
+    local $SIG{__WARN__} = sub {
+        $warn = shift;
+    };
+    $u = uniq((undef) x 3);
+    ok(not $warn);
+    ok($u, 1);
 }
 	   
-#minmax(104...)
-BEGIN { $TESTS += 6 }
+BEGIN { $TESTS += 8 }
 {
     my @list = reverse 0 .. 100_000;
     my ($min, $max) = minmax @list;
@@ -477,14 +505,24 @@ BEGIN { $TESTS += 6 }
     # floating-point comparison cunningly avoided
     ok(sprintf("%i", $min), -3);
     ok($max, 100_000);
+
+    ($min, $max) = minmax -1;
+    ok($min, -1);
+    ok($max, -1);
 }
 
-#part(110...)
-BEGIN { $TESTS += 14 }
+
+BEGIN { $TESTS += 25 }
 {
+
+    # RT #38699
+    # segv from part() on two stack grows [XS]
+    my @part = part { grow_stack(); 1024 } qw/one two/;
+    ok(scalar @part, 1025);
+
     my @list = 1 .. 12;
     my $i = 0;
-    my @part = part { $i++ % 3 } @list;
+    @part = part { $i++ % 3 } @list;
     ok(arrayeq($part[0], [ 1, 4, 7, 10 ]));
     ok(arrayeq($part[1], [ 2, 5, 8, 11 ]));
     ok(arrayeq($part[2], [ 3, 6, 9, 12 ]));
@@ -506,11 +544,37 @@ BEGIN { $TESTS += 14 }
     @part = part { undef } @list;
     ok(arrayeq($part[0], [ 1 .. 12 ]));
 
-    @part = part { 1_000_000 } @list;
-    ok(arrayeq($part[1_000_000], [ @list ]));
+    @part = part { 100_000 } @list;
+    ok(arrayeq($part[100_000], [ @list ]));
     ok(!defined $part[0]);
     ok(!defined $part[@part/2]);
-    ok(!defined $part[999_999]);
+    ok(!defined $part[99_999]);
+
+    # changing the list in place used to destroy
+    # its elements due to a wrong refcnt
+    @list = 1 .. 10;
+    @list = part { $_ } @list;
+    for (1 .. 10) {
+            ok(arrayeq($list[$_], [ $_ ]));
+    }
+}
+
+
+BEGIN { $TESTS += 2022 }
+{
+    my @list = my @in = 1 .. 1000;
+    for my $elem (@in) {
+        ok(scalar bsearch { $_ - $elem } @list);
+    }
+    for my $elem (@in) {
+        my ($e) =  bsearch { $_ - $elem } @list;
+        ok($e == $elem);
+    }
+    my @out = (-10 .. 0, 1001 .. 1011);
+    for my $elem (@out) {
+        my $r = bsearch { $_ - $elem } @list;
+        ok(!defined $r);
+    }
 }
 
 BEGIN { plan tests => $TESTS }

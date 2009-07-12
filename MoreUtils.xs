@@ -153,6 +153,37 @@ sv_tainted(SV *sv)
 #define WARN_ON \
     PL_curcop->cop_warnings = oldwarn;
 
+#define FUNC_NAME GvNAME(GvEGV(ST(items)))
+
+inline static int 
+in_pad (const char *name, SV *code) {
+
+    GV *gv;
+    HV *stash;
+    CV *cv = sv_2cv(code, &stash, &gv, 0);
+    AV *av = CvPADLIST(cv);
+    AV *pad_names = (AV*)AvARRAY(av)[0];
+
+    SV **names = AvARRAY(pad_names);
+    int len   = av_len(pad_names);
+    register int i = 0;
+    for (i = 0; i <= len; ++i) {
+
+        /* perl < 5.6.0 does not yet have our */
+#       if (PERL_VERSION > 5)
+        if (SvFLAGS(names[i]) & SVpad_OUR)
+            continue;
+#       endif
+
+        if (!SvOK(names[i]))
+            continue;
+
+        if (strEQ(SvPV_nolen(names[i]), "$a") || strEQ(SvPV_nolen(names[i]), "$b"))
+            return 1;
+    }
+    return 0;
+}
+
 #define EACH_ARRAY_BODY \
 	register int i;									\
 	arrayeach_args * args;								\
@@ -168,6 +199,8 @@ sv_tainted(SV *sv)
 	args->curidx = 0;								\
 											\
 	for (i = 0; i < items; i++) {							\
+            if (!SvROK(ST(i)))                                                          \
+                croak("Arguments to %s must be references", FUNC_NAME);              \
 	    args->avs[i] = (AV*)SvRV(ST(i));						\
 	    SvREFCNT_inc(args->avs[i]);							\
 	}										\
@@ -295,7 +328,7 @@ CODE:
     CV *cv;
 
     if (items <= 1)
-	XSRETURN_UNDEF;
+	XSRETURN_YES;
 
     cv = sv_2cv(code, &stash, &gv, 0);
     PUSH_MULTICALL(cv);
@@ -599,6 +632,7 @@ CODE:
     for(i = 1 ; i < items ; ++i) {
 	GvSV(PL_defgv) = newSVsv(args[i]);
 	MULTICALL;
+        args = &PL_stack_base[ax];
 	args[i-1] = GvSV(PL_defgv);
     }
     POP_MULTICALL;
@@ -777,16 +811,15 @@ CODE:
 	GvSV(PL_defgv) = args[i];
 	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) {
-	    args[j] = sv_2mortal(newSViv(i-1));
-	    /* need to artificially increase ref-count here
-	     * because POPBLOCK further below would otherwise
-	     * free the items in SP */
-	    SvREFCNT_inc(args[j]);
+	    args[j] = newSViv(i-1);
 	    j++;
 	}
     }
-    
+
     POP_MULTICALL;
+
+    for (i = 0; i < j; ++i)
+        sv_2mortal(args[i]);
     
     XSRETURN(j);
 }
@@ -1009,6 +1042,10 @@ pairwise (code, ...)
 	
 	int nitems = 0, maxitems = 0;
 	register int d;
+
+        if (in_pad("a", code) || in_pad("b", code)) {
+            croak("Can't use lexical $a or $b in pairwise code block");
+        }
 	
 	/* deref AV's for convenience and 
 	 * get maximum items */
@@ -1138,8 +1175,10 @@ mesh (...)
 	register int i, j, maxidx = -1;
 	AV **avs;
 	New(0, avs, items, AV*);
-	
+
 	for (i = 0; i < items; i++) {
+            if (!SvROK(ST(i)))
+                croak("Arguments to %s must be references", FUNC_NAME);
 	    avs[i] = (AV*)SvRV(ST(i));
 	    if (av_len(avs[i]) > maxidx)
 		maxidx = av_len(avs[i]);
@@ -1163,29 +1202,34 @@ uniq (...)
     {
 	register int i, count = 0;
 	HV *hv = newHV();
+        SV *undef = newRV_noinc(newSV(0));
 	
 	/* don't build return list in scalar context */
 	if (GIMME == G_SCALAR) {
 	    for (i = 0; i < items; i++) {
-		if (!hv_exists_ent(hv, ST(i), 0)) {
+                SV *e = SvOK(ST(i)) ? ST(i) : undef;
+		if (!hv_exists_ent(hv, e, 0)) {
 		    count++;
-		    hv_store_ent(hv, ST(i), &PL_sv_yes, 0);
+		    hv_store_ent(hv, e, &PL_sv_yes, 0);
 		}
 	    }
 	    SvREFCNT_dec(hv);
+            SvREFCNT_dec(undef);
 	    ST(0) = sv_2mortal(newSViv(count));
 	    XSRETURN(1);
 	}
 
 	/* list context: populate SP with mortal copies */
 	for (i = 0; i < items; i++) {
-	    if (!hv_exists_ent(hv, ST(i), 0)) {
+            SV *e = SvOK(ST(i)) ? ST(i) : undef;
+	    if (!hv_exists_ent(hv, e, 0)) {
 		ST(count) = sv_2mortal(newSVsv(ST(i)));
 		count++;
-		hv_store_ent(hv, ST(i), &PL_sv_yes, 0);
+		hv_store_ent(hv, e, &PL_sv_yes, 0);
 	    }
 	}
 	SvREFCNT_dec(hv);
+        SvREFCNT_dec(undef);
 	XSRETURN(count);
     }
 
@@ -1203,6 +1247,12 @@ minmax (...)
 
 	minsv = maxsv = ST(0);
 	min = max = slu_sv_value(minsv);
+
+        if (items == 1) {
+            EXTEND(SP, 1);
+            ST(0) = ST(1) = minsv;
+            XSRETURN(2);
+        }
 
 	for (i = 1; i < items; i += 2) {
 	    asv = ST(i-1);
@@ -1307,6 +1357,7 @@ CODE:
 	SvREFCNT_inc(args[i]);
     }
     POP_MULTICALL;
+    //SPAGAIN;
 
     EXTEND(SP, last);
     for (i = 0; i < last; ++i) {
@@ -1314,9 +1365,9 @@ CODE:
 	    ST(i) = &PL_sv_undef;
 	    continue;
 	}
-	ST(i) = newRV_noinc((SV*)tmp[i]);
+	ST(i) = sv_2mortal(newRV_noinc((SV*)tmp[i]));
     }
-    
+
     Safefree(tmp);
     XSRETURN(last);
 }
@@ -1388,6 +1439,67 @@ CODE:
 }
 
 #endif
+
+SV *
+bsearch (code, ...)
+    SV *code;
+PROTOTYPE: &@
+CODE:
+{
+    dMULTICALL;
+    HV *stash;
+    GV *gv;
+    SV **args = &PL_stack_base[ax+1];
+    CV *cv;
+    I32 gimme = GIMME; /* perl-5.5.4 bus-errors out later when using GIMME 
+                          therefore we save its value in a fresh variable */
+
+    register long long i, j;
+    int val = -1;
+
+    if (items > 1) {
+
+	cv = sv_2cv(code, &stash, &gv, 0);
+	PUSH_MULTICALL(cv);
+	SAVESPTR(GvSV(PL_defgv));
+    
+        i = 0;
+        j = items - 1;
+        do {
+            long long k = ((double)(i + j)) / 2.0;
+
+            if (k >= items-1)
+                break;
+
+            GvSV(PL_defgv) = args[k];
+            MULTICALL;
+            val = SvIV(*PL_stack_sp);
+
+            if (val == 0) {
+                POP_MULTICALL;
+                if (gimme == G_SCALAR)
+                    XSRETURN_YES;
+                SvREFCNT_inc(RETVAL = args[k]);
+                goto yes;
+            }
+            if (val < 0) {
+                i = k+1;
+            } else {
+                j = k-1;
+            }
+        } while (i <= j);
+        POP_MULTICALL;
+    }
+
+    if (gimme == G_ARRAY)
+        XSRETURN_EMPTY;
+    else
+        XSRETURN_UNDEF;
+yes:
+    ;
+}
+OUTPUT:
+    RETVAL
 
 void
 _XScompiled ()
