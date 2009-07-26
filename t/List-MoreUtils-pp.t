@@ -8,7 +8,6 @@ use List::MoreUtils qw/:all/;
 sub arrayeq {
     local $^W = 0;
     my ($ary1, $ary2) = @_;
-    #warn "(@$ary1) != (@$ary2)\n";
     return 0 if @$ary1 != @$ary2;
     for (0 .. $#$ary1) {
 	if ($ary1->[$_] ne $ary2->[$_]) {
@@ -313,8 +312,8 @@ BEGIN { $TESTS += 5 }
     # testing two iterators on the same arrays in parallel
     @a = (1, 3, 5);
     @b = (2, 4, 6);
-    my $i1 = each_array @a, @b;
-    my $i2 = each_array @a, @b;
+    my $i1 = each_arrayref \@a, \@b;
+    my $i2 = each_arrayref \@a, \@b;
     @r = ();
     while (my ($a, $b) = $i1->() and my ($c, $d) = $i2->()) {
 	push @r, $a, $b, $c, $d;

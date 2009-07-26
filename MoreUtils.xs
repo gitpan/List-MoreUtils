@@ -257,7 +257,6 @@ CODE:
     GV *gv;
     HV *stash;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     if (items <= 1)
@@ -268,7 +267,7 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 	    
     for(i = 1 ; i < items ; ++i) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) {
 	    POP_MULTICALL;
@@ -290,7 +289,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     if (items <= 1)
@@ -301,7 +299,7 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
  
     for(i = 1 ; i < items ; i++) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (!SvTRUE(*PL_stack_sp)) {
 	    POP_MULTICALL;
@@ -324,7 +322,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     if (items <= 1)
@@ -335,7 +332,7 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 
     for(i = 1 ; i < items ; ++i) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) {
 	    POP_MULTICALL;
@@ -357,7 +354,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     if (items <= 1)
@@ -368,7 +364,7 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 	    
     for(i = 1 ; i < items ; ++i) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (!SvTRUE(*PL_stack_sp)) {
 	    POP_MULTICALL;
@@ -391,7 +387,6 @@ CODE:
     GV *gv;
     I32 gimme = G_SCALAR;
     I32 count = 0;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     if (items <= 1)
@@ -402,7 +397,7 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 
     for(i = 1 ; i < items ; ++i) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) 
 	    count++;
@@ -427,7 +422,6 @@ CODE:
     GV *gv;
     I32 gimme = G_SCALAR;
     I32 count = 0;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     if (items <= 1)
@@ -438,7 +432,7 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 
     for(i = 1 ; i < items ; ++i) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (!SvTRUE(*PL_stack_sp)) 
 	    count++;
@@ -462,7 +456,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     RETVAL = -1;
@@ -473,7 +466,7 @@ CODE:
 	SAVESPTR(GvSV(PL_defgv));
  
 	for (i = 1 ; i < items ; ++i) {
-	    GvSV(PL_defgv) = args[i];
+	    GvSV(PL_defgv) = PL_stack_base[ax+i];
 	    MULTICALL;
 	    if (SvTRUE(*PL_stack_sp)) {
 		RETVAL = i-1;
@@ -497,7 +490,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     RETVAL = -1;
@@ -508,7 +500,7 @@ CODE:
 	SAVESPTR(GvSV(PL_defgv));
  
 	for (i = items-1 ; i > 0 ; --i) {
-	    GvSV(PL_defgv) = args[i];
+	    GvSV(PL_defgv) = PL_stack_base[ax+i];
 	    MULTICALL;
 	    if (SvTRUE(*PL_stack_sp)) {
 		RETVAL = i-1;
@@ -619,7 +611,6 @@ CODE:
     GV *gv;
     I32 gimme = G_SCALAR;
     CV *cv;
-    SV **args = &PL_stack_base[ax];	
     I32 count = 0;
     
     if (items <= 1)
@@ -630,10 +621,9 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 	    
     for(i = 1 ; i < items ; ++i) {
-	GvSV(PL_defgv) = newSVsv(args[i]);
+	GvSV(PL_defgv) = newSVsv(PL_stack_base[ax+i]);
 	MULTICALL;
-        args = &PL_stack_base[ax];
-	args[i-1] = GvSV(PL_defgv);
+        PL_stack_base[ax+i-1] = GvSV(PL_defgv);
     }
     POP_MULTICALL;
 
@@ -653,7 +643,6 @@ CODE:
     CV *cv;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
 
     if (items <= 1)
 	XSRETURN_EMPTY;
@@ -663,7 +652,7 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 
     for (i = 1; i < items; i++) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) {
 	    break;
@@ -673,7 +662,7 @@ CODE:
     POP_MULTICALL;
 
     for (j = i + 1; j < items; ++j)
-	args[j-i-1] = args[j];
+	PL_stack_base[ax+j-i-1] = PL_stack_base[ax+j];
 
     XSRETURN(items-i-1);
 }
@@ -690,7 +679,6 @@ CODE:
     CV *cv;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
 
     if (items <= 1)
 	XSRETURN_EMPTY;
@@ -700,7 +688,7 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 
     for (i = 1; i < items; i++) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) {
 	    break;
@@ -710,7 +698,7 @@ CODE:
     POP_MULTICALL;
 
     for (j = i; j < items; j++)
-	args[j-i] = args[j];
+	PL_stack_base[ax+j-i] = PL_stack_base[ax+j];
 
     XSRETURN(items-i);
 }
@@ -726,7 +714,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
     
     if (items <= 1)
@@ -737,12 +724,12 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 
     for (i = 1; i < items; i++) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) {
 	    break;
 	}
-	args[i-1] = args[i];
+	PL_stack_base[ax+i-1] = PL_stack_base[ax+i];
     }
 
     POP_MULTICALL;
@@ -761,7 +748,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     if (items <= 1)
@@ -772,9 +758,9 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
 
     for (i = 1; i < items; ++i) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
-	args[i-1] = args[i];
+	PL_stack_base[ax+i-1] = PL_stack_base[ax+i];
 	if (SvTRUE(*PL_stack_sp)) {
 	    ++i;
 	    break;
@@ -797,7 +783,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     if (items <= 1)
@@ -808,10 +793,10 @@ CODE:
     SAVESPTR(GvSV(PL_defgv));
     
     for (i = 1, j = 0; i < items; i++) {
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) {
-	    args[j] = newSViv(i-1);
+	    PL_stack_base[ax+j] = newSViv(i-1);
 	    j++;
 	}
     }
@@ -819,7 +804,7 @@ CODE:
     POP_MULTICALL;
 
     for (i = 0; i < j; ++i)
-        sv_2mortal(args[i]);
+        sv_2mortal(PL_stack_base[ax+i]);
     
     XSRETURN(j);
 }
@@ -835,7 +820,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];	
     CV *cv;
 
     RETVAL = &PL_sv_undef;
@@ -846,11 +830,11 @@ CODE:
 	SAVESPTR(GvSV(PL_defgv));
 
 	for (i = items-1 ; i > 0 ; --i) {
-	    GvSV(PL_defgv) = args[i];
+	    GvSV(PL_defgv) = PL_stack_base[ax+i];
 	    MULTICALL;
 	    if (SvTRUE(*PL_stack_sp)) {
-		/* see comment in indexes() */
-		SvREFCNT_inc(RETVAL = args[i]);
+		/* POP_MULTICALL further down will decrement it by one */
+		SvREFCNT_inc(RETVAL = PL_stack_base[ax+i]);
 		break;
 	    }
 	}
@@ -871,7 +855,6 @@ CODE:
     HV *stash;
     GV *gv;
     I32 gimme = G_SCALAR;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
 
     RETVAL = &PL_sv_undef;
@@ -882,11 +865,11 @@ CODE:
 	SAVESPTR(GvSV(PL_defgv));
 
 	for (i = 1; i < items; ++i) {
-	    GvSV(PL_defgv) = args[i];
+	    GvSV(PL_defgv) = PL_stack_base[ax+i];
 	    MULTICALL;
 	    if (SvTRUE(*PL_stack_sp)) {
-		/* see comment in indexes() */
-		SvREFCNT_inc(RETVAL = args[i]);
+		/* POP_MULTICALL further down will decrement it by one */
+		SvREFCNT_inc(RETVAL = PL_stack_base[ax+i]);
 		break;
 	    }
 	}
@@ -1323,7 +1306,6 @@ CODE:
     GV *gv;
     I32 gimme = G_SCALAR;
     I32 count = 0;
-    SV **args = &PL_stack_base[ax];
     CV *cv;
     
     AV **tmp = NULL;
@@ -1338,7 +1320,7 @@ CODE:
 
     for(i = 1 ; i < items ; ++i) {
 	int idx;
-	GvSV(PL_defgv) = args[i];
+	GvSV(PL_defgv) = PL_stack_base[ax+i];
 	MULTICALL;
 	idx = SvIV(*PL_stack_sp);
 
@@ -1353,11 +1335,11 @@ CODE:
 	}
 	if (!tmp[idx])
 	    tmp[idx] = newAV();
-	av_push(tmp[idx], args[i]);
-	SvREFCNT_inc(args[i]);
+	av_push(tmp[idx], PL_stack_base[ax+i]);
+	SvREFCNT_inc(PL_stack_base[ax+i]);
     }
     POP_MULTICALL;
-    //SPAGAIN;
+    SPAGAIN;
 
     EXTEND(SP, last);
     for (i = 0; i < last; ++i) {
@@ -1449,7 +1431,6 @@ CODE:
     dMULTICALL;
     HV *stash;
     GV *gv;
-    SV **args = &PL_stack_base[ax+1];
     CV *cv;
     I32 gimme = GIMME; /* perl-5.5.4 bus-errors out later when using GIMME 
                           therefore we save its value in a fresh variable */
@@ -1471,7 +1452,7 @@ CODE:
             if (k >= items-1)
                 break;
 
-            GvSV(PL_defgv) = args[k];
+            GvSV(PL_defgv) = PL_stack_base[ax+1+k];
             MULTICALL;
             val = SvIV(*PL_stack_sp);
 
@@ -1479,7 +1460,7 @@ CODE:
                 POP_MULTICALL;
                 if (gimme == G_SCALAR)
                     XSRETURN_YES;
-                SvREFCNT_inc(RETVAL = args[k]);
+                SvREFCNT_inc(RETVAL = PL_stack_base[ax+1+k]);
                 goto yes;
             }
             if (val < 0) {

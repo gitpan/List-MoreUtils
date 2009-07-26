@@ -19,7 +19,7 @@ use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-$VERSION = '0.23';
+$VERSION = '0.24';
 
 eval {
     local $ENV{PERL_DL_NONLAZY} = 0 if $ENV{PERL_DL_NONLAZY};
@@ -827,11 +827,11 @@ L<List::Util>
 
 =head1 AUTHOR
 
-Tassilo von Parseval, E<lt>tassilo.von.parseval@rwth-aachen.deE<gt>
+Tassilo von Parseval, E<lt>vparseval@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2004-2006 by Tassilo von Parseval
+Copyright (C) 2004-2009 by Tassilo von Parseval
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.4 or,
