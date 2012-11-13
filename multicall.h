@@ -153,8 +153,10 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 
 #define POP_MULTICALL \
     STMT_START {							\
-	CvDEPTH(multicall_cv)--;					\
-	LEAVESUB(multicall_cv);						\
+        cx = &cxstack[cxstack_ix];					\
+        if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\
+	    LEAVESUB(multicall_cv);					\
+	}								\
 	POPBLOCK(cx,PL_curpm);						\
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\

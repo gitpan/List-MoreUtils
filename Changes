@@ -1,5 +1,19 @@
 Revision history for Perl extension List-MoreUtils
 
+0.33_005 2012-11-13 14:25:14 rurban
+    - *** UNAUTHORIZED RELEASE ***
+    - Apply patch to fix realloc cx corruption and heap-use-after-free (RT77874)
+
+0.33_004 Wed Oct 24 2012
+    - *** UNAUTHORIZED RELEASE ***
+    - Apply patch to fix 'after', which was capable of corrupting memory if no
+      element is found in list.  (RT75727).
+    - Changed two mentions in the POD of 'first_val' and 'last_val' to their
+      correct names: 'first_value', and 'last_value' (RT78527).
+    - Fixed unwanted warnings from pairwise when $a and $b are
+      "used only once". (RT76749)
+    - Added t/04_pairwise_warn.t to verify the fix.
+
 0.33 Thu 4 Aug 2011
 	- Updated can_xs to fix a bug in it
 

@@ -640,6 +640,9 @@ CODE:
 
     POP_MULTICALL;
 
+    if( i == items ) /* The above loop didn't find an element. (RT75727) */
+      XSRETURN_EMPTY;
+
     for (j = i + 1; j < items; ++j)
 	args[j-i-1] = args[j];
 

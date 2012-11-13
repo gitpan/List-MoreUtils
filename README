@@ -174,7 +174,7 @@ DESCRIPTION
         Each element of LIST is set to $_ in turn. Returns "undef" if no
         such element has been found.
 
-        "first_val" is an alias for "firstval".
+        "first_value" is an alias for "firstval".
 
     lastval BLOCK LIST
     last_value BLOCK LIST
@@ -182,7 +182,7 @@ DESCRIPTION
         Each element of LIST is set to $_ in turn. Returns "undef" if no
         such element has been found.
 
-        "last_val" is an alias for "lastval".
+        "last_value" is an alias for "lastval".
 
     pairwise BLOCK ARRAY1 ARRAY2
         Evaluates BLOCK for each pair of elements in ARRAY1 and ARRAY2 and

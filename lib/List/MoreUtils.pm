@@ -7,8 +7,8 @@ use DynaLoader ();
 
 use vars qw{ $VERSION @ISA @EXPORT_OK %EXPORT_TAGS };
 BEGIN {
-    $VERSION   = '0.33';
-    # $VERSION   = eval $VERSION;
+    $VERSION   = '0.33_005';
+    $VERSION   = eval $VERSION;
     @ISA       = qw{ Exporter DynaLoader };
     @EXPORT_OK = qw{
         any all none notall true false
@@ -355,6 +355,13 @@ die $@ if $@;
 *zip         = \&mesh;
 *distinct    = \&uniq;
 
+# If pairwise is exported, let Perl "see" $a and $b in the caller's symbol table
+# so there won't be a "used only once" warning for those two symbols.
+if( eval{ caller(1)->can('pairwise'); 1; } ) {   # caller(1): eval adds a level.
+    no strict 'refs';
+    local ${ caller . '::a' }, ${ caller . '::b' }; # caller(0): importing pkg.
+}
+
 1;
 
 __END__
@@ -556,7 +563,7 @@ Returns the first element in LIST for which BLOCK evaluates to true. Each
 element of LIST is set to C<$_> in turn. Returns C<undef> if no such element
 has been found.
 
-C<first_val> is an alias for C<firstval>.
+C<first_value> is an alias for C<firstval>.
 
 =item lastval BLOCK LIST
 
@@ -566,7 +573,7 @@ Returns the last value in LIST for which BLOCK evaluates to true. Each element
 of LIST is set to C<$_> in turn. Returns C<undef> if no such element has been
 found.
 
-C<last_val> is an alias for C<lastval>.
+C<last_value> is an alias for C<lastval>.
 
 =item pairwise BLOCK ARRAY1 ARRAY2
 

@@ -11,8 +11,10 @@ sanexs.c
 t/01_compile.t
 t/02_perl.t
 t/03_xs.t
+t/04_pairwise_warn.t
 t/lib/Test.pm
 xt/meta.t
 xt/pmv.t
 xt/pod.t
 META.yml                                 Module meta-data (added by MakeMaker)
+META.json
