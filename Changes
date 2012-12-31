@@ -1,10 +1,21 @@
 Revision history for Perl extension List-MoreUtils
 
+0.33_007 2012-12-31 09:40:20 rurban
+    - *** UNAUTHORIZED RELEASE ***
+    - More pairwise() use only once warnings fixes, PP and XS (RT81767, RT76749)
+    - Fixed bootstrap of XS devel versions
+
+0.33_006 Tue Nov 13 2012 (davido)
+    - *** UNAUTHORIZED RELEASE ***
+    - Remove "pairwise warnings" patch; it was only effective against the first
+      calling scope, and breaks Perl 5.6.  (RT76749 reverts to unresolved).
+    - Shifted t/04_pairwise_warn.t to a TODO test.
+    
 0.33_005 2012-11-13 14:25:14 rurban
     - *** UNAUTHORIZED RELEASE ***
     - Apply patch to fix realloc cx corruption and heap-use-after-free (RT77874)
 
-0.33_004 Wed Oct 24 2012
+0.33_004 Wed Oct 24 2012 (davido)
     - *** UNAUTHORIZED RELEASE ***
     - Apply patch to fix 'after', which was capable of corrupting memory if no
       element is found in list.  (RT75727).

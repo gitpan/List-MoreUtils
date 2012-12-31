@@ -5,10 +5,10 @@ use strict;
 use Exporter   ();
 use DynaLoader ();
 
-use vars qw{ $VERSION @ISA @EXPORT_OK %EXPORT_TAGS };
+use vars qw{ $VERSION $XS_VERSION @ISA @EXPORT_OK %EXPORT_TAGS };
 BEGIN {
-    $VERSION   = '0.33_005';
-    $VERSION   = eval $VERSION;
+    $VERSION   = '0.33_007';
+    $XS_VERSION   = eval $VERSION;
     @ISA       = qw{ Exporter DynaLoader };
     @EXPORT_OK = qw{
         any all none notall true false
@@ -25,6 +25,14 @@ BEGIN {
     %EXPORT_TAGS = (
         all => \@EXPORT_OK,
     );
+
+    # Mention $a and $b within the caller's package to eliminate the
+    # "used only once" warnings. RT 76749
+    {
+        no strict 'refs';
+        ${caller().'::a'} = ${caller().'::a'};
+        ${caller().'::b'} = ${caller().'::b'};
+    }
 
     # Load the XS at compile-time so that redefinition warnings will be
     # thrown correctly if the XS versions of part or indexes loaded
@@ -231,8 +239,8 @@ sub pairwise (&\@\@) {
     # Loop iteration limit
     my $limit = $#A > $#B? $#A : $#B;
 
-    # This map expression is also the return value
     local( *$caller_a, *$caller_b );
+    # This map expression is also the return value
     map {
         # Assign to $a, $b as refs to caller's array elements
         ( *$caller_a, *$caller_b ) = \( $A[$_], $B[$_] );
@@ -354,13 +362,6 @@ die $@ if $@;
 *last_value  = \&lastval;
 *zip         = \&mesh;
 *distinct    = \&uniq;
-
-# If pairwise is exported, let Perl "see" $a and $b in the caller's symbol table
-# so there won't be a "used only once" warning for those two symbols.
-if( eval{ caller(1)->can('pairwise'); 1; } ) {   # caller(1): eval adds a level.
-    no strict 'refs';
-    local ${ caller . '::a' }, ${ caller . '::b' }; # caller(0): importing pkg.
-}
 
 1;
 
@@ -792,6 +793,9 @@ Perl-implementation.
 
 Robin Huston kindly fixed a bug in perl's MULTICALL API to make the
 XS-implementation of part() work.
+
+Reini Urban (rurban) and David J Oswald (davido) applied various outstanding
+patches and fixed various tickets. The RT queue still has 57 open issues.
 
 =head1 TODO
 

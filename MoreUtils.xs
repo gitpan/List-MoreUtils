@@ -196,7 +196,7 @@ typedef struct {
 } natatime_args;
 
 void
-insert_after (int idx, SV *what, AV *av) {
+insert_after (int idx, SV *val, AV *av) {
     register int i, len;
     av_extend(av, (len = av_len(av) + 1));
     
@@ -205,8 +205,8 @@ insert_after (int idx, SV *what, AV *av) {
 	SvREFCNT_inc(*sv);
 	av_store(av, i, *sv);
     }
-    if (!av_store(av, idx+1, what))
-	SvREFCNT_dec(what);
+    if (!av_store(av, idx+1, val))
+	SvREFCNT_dec(val);
 
 }
 
