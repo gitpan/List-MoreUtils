@@ -1,4 +1,4 @@
-/*    multicall.h (version 1.0)
+/*    multicall.h		(version 1.0)
  *
  * Implements a poor-man's MULTICALL interface for old versions
  * of perl that don't offer a proper one. Intended to be compatible
@@ -99,6 +99,7 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
   (PERL_REVISION == 5 && PERL_VERSION == 9 && PERL_SUBVERSION < 2) \
 )
 
+
 /* PUSHSUB is defined so differently on different versions of perl
  * that it's easier to define our own version than code for all the
  * different possibilities.
@@ -153,10 +154,8 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 
 #define POP_MULTICALL \
     STMT_START {							\
-        cx = &cxstack[cxstack_ix];					\
-        if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\
-	    LEAVESUB(multicall_cv);					\
-	}								\
+	CvDEPTH(multicall_cv)--;					\
+	LEAVESUB(multicall_cv);						\
 	POPBLOCK(cx,PL_curpm);						\
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\

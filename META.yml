@@ -2,13 +2,15 @@
 abstract: 'Provide the stuff missing in List::Util'
 author:
   - 'Tassilo von Parseval <tassilo.von.parseval@rwth-aachen.de>'
+  - 'Adam Kennedy <adamk@cpan.org>'
+  - 'Jens Rehsack <rehsack@cpan.org>'
 build_requires:
-  Test::More: 0.42
+  Test::More: 0.88
 configure_requires:
-  ExtUtils::CBuilder: 0.27
+  Config::AutoConf: 0.19
   ExtUtils::MakeMaker: 6.52
 dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120630'
+generated_by: 'ExtUtils::MakeMaker version 6.78, CPAN::Meta::Converter version 2.132661'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -19,6 +21,7 @@ no_index:
     - t
     - inc
 requires:
-  Test::More: 0.82
-  perl: 5.00503
-version: 0.33_007
+  perl: 5.008003
+resources:
+  repository: https://github.com/perl5-utils/List-MoreUtils
+version: 0.400

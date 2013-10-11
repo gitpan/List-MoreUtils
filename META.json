@@ -1,10 +1,12 @@
 {
    "abstract" : "Provide the stuff missing in List::Util",
    "author" : [
-      "Tassilo von Parseval <tassilo.von.parseval@rwth-aachen.de>"
+      "Tassilo von Parseval <tassilo.von.parseval@rwth-aachen.de>",
+      "Adam Kennedy <adamk@cpan.org>",
+      "Jens Rehsack <rehsack@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120630",
+   "generated_by" : "ExtUtils::MakeMaker version 6.78, CPAN::Meta::Converter version 2.132661",
    "license" : [
       "perl_5"
    ],
@@ -22,22 +24,26 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "Test::More" : "0.42"
+            "Test::More" : "0.88"
          }
       },
       "configure" : {
          "requires" : {
-            "ExtUtils::CBuilder" : "0.27",
+            "Config::AutoConf" : "0.19",
             "ExtUtils::MakeMaker" : "6.52"
          }
       },
       "runtime" : {
          "requires" : {
-            "Test::More" : "0.82",
-            "perl" : "5.00503"
+            "perl" : "5.008003"
          }
       }
    },
-   "release_status" : "testing",
-   "version" : "0.33_007"
+   "release_status" : "stable",
+   "resources" : {
+      "repository" : {
+         "url" : "https://github.com/perl5-utils/List-MoreUtils"
+      }
+   },
+   "version" : "0.400"
 }
